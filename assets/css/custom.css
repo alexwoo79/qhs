@@ -1,0 +1,58 @@
+/* PDF 容器样式 */
+.hextra-pdf {
+  width: 100%;
+  margin: 1rem 0;
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid #e0e0e0;
+}
+
+.hextra-pdf iframe {
+  min-height: 600px; /* 自定义高度 */
+  width: 100%;
+  border: none;
+  display: block;
+}
+
+/* 全屏按钮样式 */
+.hextra-pdf-fullscreen-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 10;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.hextra-pdf:hover .hextra-pdf-fullscreen-btn {
+  opacity: 1;
+}
+
+.hextra-pdf-fullscreen-btn:hover {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+/* 全屏模式样式 */
+.hextra-pdf.fullscreen {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  z-index: 9999 !important;
+}
+
+.hextra-pdf.fullscreen iframe {
+  min-height: 100vh !important;
+  height: 100vh !important;
+}

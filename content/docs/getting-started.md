@@ -202,10 +202,8 @@ See [Git submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules) for mo
 
 ## Next
 
-Explore the following sections to start adding more contents:
+了解 Hextra 主题的基本功能和配置，可以参考以下文档：
 
 {{< cards >}}
-  {{< card link="../guide/organize-files" title="Organize Files" icon="document-duplicate" >}}
-  {{< card link="../guide/configuration" title="Configuration" icon="adjustments" >}}
-  {{< card link="../guide/markdown" title="Markdown" icon="markdown" >}}
+  {{< card link="https://imfing.github.io/hextra/docs/guide/" title="Organize Files" icon="document-duplicate" >}}
 {{< /cards >}}

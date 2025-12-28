@@ -1,0 +1,57 @@
+{{- /*
+Shortcode to include a PDF file in a page.
+
+@param {string} 0 The path to the PDF file.
+
+@example {{< pdf "path/to/file.pdf" >}}
+*/ -}}
+
+{{- $path := .Get 0 -}}
+{{- $url := partial "utils/file-path" (dict "page" .Page "path" $path) -}}
+
+
+<div class="hextra-pdf" id="hextra-pdf-{{ .Ordinal }}">
+  <button class="hextra-pdf-fullscreen-btn" onclick="togglePdfFullscreen('{{ .Ordinal }}')" title="全屏显示">
+    ⛶ 全屏
+  </button>
+  <iframe src="{{ $url | safeURL }}" width="100%" style="min-height: 32rem;" frameborder="0" allowfullscreen></iframe>
+</div>
+
+<script>
+function togglePdfFullscreen(ordinal) {
+  const pdfContainer = document.getElementById('hextra-pdf-' + ordinal);
+  
+  if (pdfContainer.classList.contains('fullscreen')) {
+    // 退出全屏
+    pdfContainer.classList.remove('fullscreen');
+    document.body.style.overflow = '';
+  } else {
+    // 进入全屏
+    pdfContainer.classList.add('fullscreen');
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+// 点击 ESC 退出全屏
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    const fullscreenPdf = document.querySelector('.hextra-pdf.fullscreen');
+    if (fullscreenPdf) {
+      fullscreenPdf.classList.remove('fullscreen');
+      document.body.style.overflow = '';
+    }
+  }
+});
+
+// 点击全屏容器外部退出全屏
+document.addEventListener('click', function(e) {
+  const fullscreenPdf = document.querySelector('.hextra-pdf.fullscreen');
+  if (fullscreenPdf && !fullscreenPdf.contains(e.target)) {
+    // 检查点击的是否是全屏按钮
+    if (!e.target.classList.contains('hextra-pdf-fullscreen-btn')) {
+      fullscreenPdf.classList.remove('fullscreen');
+      document.body.style.overflow = '';
+    }
+  }
+});
+</script>

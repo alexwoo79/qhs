@@ -3,6 +3,8 @@ date: '2025-12-28T11:13:11+08:00'
 draft: true
 title: ''
 ---
+
+
 {{< qr >}}
 https://gohugo.io
 {{< /qr >}}
@@ -14,9 +16,9 @@ https://gohugo.io
   class="ma0 w-75"
 >}}
 {{< youtube 0RKpf3rK57I >}}
-{{< callout type="important" icon="sparkles" >}}
-  A **callout** is a short piece of text intended to attract attention.
-{{< /callout >}}
+
 {{< cards >}}
-  {{< card link="/" title="Image Card" image="https://www.nps.gov/common/uploads/grid_builder/zion/crop16_9/FEDAACB2-A243-5102-F3B9A7412A8C4E2C.jpg?width=1300&quality=90&mode=crop" subtitle="Unsplash Landscape" >}}
+  {{< card link="/" title="Image Card" image="https://source.unsplash.com/featured/800x600?landscape" subtitle="Unsplash Landscape" >}}
+  {{< card link="/" title="Local Image" image="/images/card-image-unprocessed.jpg" subtitle="Raw image under static directory." >}}
+  {{< card link="/" title="Local Image" image="images/space.jpg" subtitle="Image under assets directory, processed by Hugo." method="Resize" options="600x q80 webp" >}}
 {{< /cards >}}

@@ -8,12 +8,12 @@ categories:
 
 
 
-{{< callout >}}
-  iframe is a html element that allows you to embed another html document within the current document.
-{{< /callout >}}
+>[!TIP]
+>iframe is a html element that allows you to embed another html document within the current document.
 
 
-{{% steps %}}
+
+
 
 ### iframe 1
  iframe insert youtube video
@@ -27,7 +27,9 @@ categories:
 <iframe width=100% height=500px src="/coding/index.html" ></iframe>
 
 
-{{% /steps %}}
 
+### bilibili short code
 
+实际示例,使用BV后的号码即可：
+{{< bilibili "1R7mgBqENR" >}}
 
