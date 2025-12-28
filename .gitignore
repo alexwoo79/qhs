@@ -1,8 +1,16 @@
+# 忽略Quarto项目的配置和缓存目录
 /.quarto/
+# 忽略所有的.quarto_ipynb文件，通常是Quarto处理Jupyter Notebook产生的临时文件
 **/*.quarto_ipynb
+# Hugo或其他静态网站生成器的输出目录，可重新生成，无需版本控制
 public/
+# Mac系统的隐藏文件，特定于系统，跨平台协作时应忽略
 .DS_Store
+# Python虚拟环境目录，不同开发者可根据requirements.txt重新创建
 .venv/
+# 再次忽略Quarto项目的配置和缓存目录（可删除此行，避免重复）
 .quarto/
+# Hugo构建过程中生成的锁文件，不同环境可能不同，无需版本控制
 .hugo_build.lock
-.python-version
+# 项目指定的Python版本文件，可通过文档等方式传达版本信息，无需版本控制
+.python - version
