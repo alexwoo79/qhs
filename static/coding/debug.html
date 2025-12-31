@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iframe Debug Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .info {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+        }
+        .success {
+            border-left-color: #28a745;
+        }
+        .error {
+            border-left-color: #dc3545;
+        }
+        h1 {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>Iframe Debug Test</h1>
+    
+    <div class="info">
+        <strong>Current URL:</strong> <span id="currentUrl"></span>
+    </div>
+    
+    <div class="info">
+        <strong>Hostname:</strong> <span id="hostname"></span>
+    </div>
+    
+    <div class="info">
+        <strong>In Iframe:</strong> <span id="inIframe"></span>
+    </div>
+    
+    <div class="info">
+        <strong>Parent URL:</strong> <span id="parentUrl"></span>
+    </div>
+    
+    <div class="info">
+        <strong>Is Localhost:</strong> <span id="isLocalhost"></span>
+    </div>
+    
+    <div class="info">
+        <strong>Base URL Test:</strong> <span id="baseUrlTest"></span>
+    </div>
+
+    <script>
+        document.getElementById('currentUrl').textContent = window.location.href;
+        document.getElementById('hostname').textContent = window.location.hostname;
+        document.getElementById('inIframe').textContent = (window.location !== window.parent.location) ? 'Yes' : 'No';
+        
+        try {
+            document.getElementById('parentUrl').textContent = window.parent.location.href;
+        } catch (e) {
+            document.getElementById('parentUrl').textContent = 'Access denied (CORS)';
+        }
+        
+        const isLocalhost = window.location.hostname === "localhost" || 
+                           window.location.hostname === "127.0.0.1";
+        document.getElementById('isLocalhost').textContent = isLocalhost ? 'Yes' : 'No';
+        
+        // Test if we can load resources
+        const testPath = window.location.pathname;
+        document.getElementById('baseUrlTest').textContent = testPath;
+    </script>
+</body>
+</html>
