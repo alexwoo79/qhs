@@ -167,11 +167,11 @@ $$
 $$\ce{Hg^2+ ->[I-] HgI2 ->[I-] [Hg^{II}I4]^2-}$$
 
 ## tab页面
-{{< tabs items="JSON,YAML,TOML" defaultIndex="1" >}}
+{{< tabs >}}
 
-  {{< tab >}}**JSON**: JavaScript Object Notation (JSON) is a standard text-based format for representing structured data based on JavaScript object syntax.{{< /tab >}}
-  {{< tab >}}**YAML**: YAML is a human-readable data serialization language.{{< /tab >}}
-  {{< tab >}}**TOML**: TOML aims to be a minimal configuration file format that's easy to read due to obvious semantics.{{< /tab >}}
+  {{< tab name="JSON" >}}**JSON**: JavaScript Object Notation (JSON) is a standard text-based format for representing structured data based on JavaScript object syntax.{{< /tab >}}
+  {{< tab name="YAML" selected="true" >}}**YAML**: YAML is a human-readable data serialization language.{{< /tab >}}
+  {{< tab name="TOML" >}}**TOML**: TOML aims to be a minimal configuration file format that's easy to read due to obvious semantics.{{< /tab >}}
 
 {{< /tabs >}}
 
