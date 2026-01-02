@@ -15,7 +15,7 @@ tags:
 
 
 <!-- 将本地 HTML 放入 static/，Hugo 会原样发布，路径从站点根开始 -->
-{{< iframe url="../../dashboard/dashboard.html" width="100%" height="800px" >}}
+{{< iframe url="static/dashboard/dashboard.html" width="100%" height="800px" >}}
 
 
 

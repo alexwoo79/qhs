@@ -7,4 +7,4 @@ tags:
 ---
 
 
-{{< iframe url="../../dashboard/dashboard.html" height="800px" >}}
+{{< iframe url="static/dashboard/dashboard.html" height="800px" >}}
