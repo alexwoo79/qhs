@@ -25,10 +25,13 @@ Shortcode to include an iframe with fullscreen capability.
 {{- end -}}
 
 <div class="hextra-iframe" id="hextra-iframe-{{ $ordinal }}" data-nested="{{ $isNested }}">
-  <button class="hextra-iframe-fullscreen-btn hextra-btn"
-          onclick="toggleIframeFullscreen('{{ $ordinal }}')"
-          title="全屏显示">
-    ⛶ 全屏
+  <button 
+    class="hextra-iframe-fullscreen-btn hextra-btn"
+    onclick="toggleIframeFullscreen('{{ $ordinal }}')"
+    title="全屏显示(按 F 键也可触发)"
+    aria-label="全屏显示"
+  >
+    <!-- 用 CSS 伪元素替代文本，避免被摘要提取 -->
   </button>
   <iframe src="{{ $url }}"
           width="{{ $width }}"
@@ -38,6 +41,15 @@ Shortcode to include an iframe with fullscreen capability.
           title="{{ $title }}"
           sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
 </div>
+
+<!-- 新增 CSS 伪元素样式 -->
+<style>
+/* 其他样式保持不变 */
+.hextra-iframe-fullscreen-btn::before {
+  content: "⛶全屏"; /* 图标内容 */
+  display: inline-block;
+}
+</style>
 
 <style>
 .hextra-iframe {
@@ -60,15 +72,50 @@ Shortcode to include an iframe with fullscreen capability.
 }
 </style>
 
+<!-- 关键：把脚本改成立即执行，确保优先加载 -->
 <script>
+// 全屏切换函数，全局可访问
 function toggleIframeFullscreen(ordinal) {
-  const container = document.getElementById('hextra-iframe-' + ordinal);
-  if (container.classList.contains('fullscreen')) {
-    container.classList.remove('fullscreen');
-    document.body.style.overflow = '';
-  } else {
-    container.classList.add('fullscreen');
-    document.body.style.overflow = 'hidden';
-  }
+  const container = document.getElementById(`hextra-iframe-${ordinal}`);
+  if (!container) return; // 防止找不到元素
+  container.classList.toggle('fullscreen');
+  document.body.style.overflow = container.classList.contains('fullscreen') ? 'hidden' : '';
 }
+
+// 页面加载完成后再监听事件，避免元素未渲染
+document.addEventListener('DOMContentLoaded', function() {
+  // 监听 F 键，支持所有 iframe 切换（按 F 键切换当前激活的 iframe）
+  document.addEventListener('keydown', function(e) {
+    // 只响应 单独按 F 键（排除 Ctrl/Shift/Alt 组合键）
+    if (e.key.toLowerCase() === 'f' && !e.ctrlKey && !e.shiftKey && !e.altKey) {
+      e.stopImmediatePropagation(); // 阻断其他事件监听
+      e.preventDefault(); // 阻断浏览器默认行为
+
+      // 方案1：切换 最后一个 被点击的 iframe（推荐）
+      const activeIframe = document.querySelector('.hextra-iframe.active');
+      if (activeIframe) {
+        const ordinal = activeIframe.id.split('-')[2];
+        toggleIframeFullscreen(ordinal);
+        return;
+      }
+
+      // 方案2：如果没有激活的 iframe，就切换第一个
+      const firstIframe = document.querySelector('.hextra-iframe');
+      if (firstIframe) {
+        const ordinal = firstIframe.id.split('-')[2];
+        toggleIframeFullscreen(ordinal);
+      }
+    }
+  });
+
+  // 给每个 iframe 绑定点击事件，标记为 "激活状态"
+  document.querySelectorAll('.hextra-iframe').forEach(iframe => {
+    iframe.addEventListener('click', function() {
+      // 移除其他 iframe 的激活状态
+      document.querySelectorAll('.hextra-iframe').forEach(el => el.classList.remove('active'));
+      // 标记当前 iframe 为激活
+      this.classList.add('active');
+    });
+  });
+});
 </script>
