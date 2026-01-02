@@ -7,4 +7,4 @@ tags:
 ---
 
 
-<iframe src="../../dashboard/dashboard.html" width="100%" height="800px"> </iframe>
+{{< iframe url="/dashboard/dashboard.html" height="800px" >}}

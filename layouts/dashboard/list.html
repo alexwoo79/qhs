@@ -1,4 +1,13 @@
 {{ define "main" }}
+  <style>
+    .dashboard-list .hextra-iframe-fullscreen-btn,
+    .dashboard-list .hextra-pdf-fullscreen-btn {
+      display: none !important;
+    }
+    .dashboard-list .hextra-iframe iframe {
+      height: 500px !important;
+    }
+  </style>
   <div class='hx:mx-auto hx:flex hextra-max-page-width'>
     <article class="hx:w-full hx:break-words hx:flex hx:min-h-[calc(100vh-var(--navbar-height))] hx:min-w-0 hx:justify-center hx:pb-8 hx:pr-[calc(env(safe-area-inset-right)-1.5rem)]">
       <main class="hx:w-full hx:min-w-0 hx:max-w-full hx:px-6 hx:pt-4 hx:md:px-12">
@@ -19,7 +28,11 @@
                 {{ end }}
               </div>
               <div class="dashboard-list-summary">
-                {{ with .Params.summary }}{{ . }}{{ else }}{{ .Summary | truncate 200 }}{{ end }}
+                {{ if .Params.summary }}
+                  {{ .Params.summary | markdownify }}
+                {{ else }}
+                  {{ .Content }}
+                {{ end }}
               </div>
               {{ if .Params.tags }}
                 <div class="dashboard-list-tags">

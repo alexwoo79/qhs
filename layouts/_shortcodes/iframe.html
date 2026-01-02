@@ -1,39 +1,35 @@
 {{- /*
 Shortcode to include an iframe with fullscreen capability and nested iframe protection.
 
-@param {string} url The URL to embed in the iframe.
+@param {string} url The URL to embed in the iframe. (Alias: src)
 @param {string} width (Optional) The width of the iframe.
 @param {string} height (Optional) The height of the iframe.
 @param {string} title (Optional) The title attribute for the iframe.
 
 @example {{< iframe url="https://example.com">}}
+@example {{< iframe src="https://example.com">}}
 @example {{< iframe url="https://example.com" width="100%" height="400px" title="Example Website">}}
 */ -}}
 
-{{- $url := .Get "url" -}}
+{{- $url := or (.Get "url") (.Get "src") -}}
 {{- $width := .Get "width" | default "100%" -}}
 {{- $height := .Get "height" | default "32rem" -}}
 {{- $title := .Get "title" | default "Embedded Content" -}}
 {{- $ordinal := .Ordinal -}}
-{{- $inDashboardList := and (in .Page.File.Dir "dashboard/") (eq .Page.Kind "section") -}}
 {{- $inDashboardSingle := and (in .Page.File.Dir "dashboard/") (eq .Page.Kind "page") -}}
 {{- $isNested := .Get "nested" | default false -}}
 
-{{- if $inDashboardList -}}
-  {{- $height = .Get "height" | default "500px" -}}
-{{- else if $inDashboardSingle -}}
+{{- if $inDashboardSingle -}}
   {{- $height = .Get "height" | default "700px" -}}
 {{- end -}}
 
 <div class="hextra-iframe" id="hextra-iframe-{{ $ordinal }}" data-nested="{{ $isNested }}">
-  {{ if not $inDashboardList }}
   <button class="hextra-iframe-fullscreen-btn hextra-btn" 
           onclick="toggleIframeFullscreen('{{ $ordinal }}')" 
           title="全屏显示">
     ⛶ 全屏
   </button>
-  {{ end }}
-  <iframe src="{{ $url | safeURL }}" width="{{ $width }}" height="{{ $height }}" frameborder="0" allowfullscreen
+  <iframe src="{{ $url | relURL | safeURL }}" width="{{ $width }}" height="{{ $height }}" frameborder="0" allowfullscreen
     title="{{ $title }}" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
 </div>
 
