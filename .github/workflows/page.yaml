@@ -57,6 +57,7 @@ jobs:
         run: |
           hugo \
             --config config.yaml\
+            --baseURL "https://alexwoo79.github.io/qhs/" \
             --gc --minify \
             
       - name: Upload artifact

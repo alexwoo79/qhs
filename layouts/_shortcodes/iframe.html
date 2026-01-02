@@ -1,14 +1,7 @@
 {{- /*
 Shortcode to include an iframe with fullscreen capability.
-自动适配 baseURL，避免路径错误。
-
-@param {string} url The URL to embed in the iframe. (Alias: src)
-@param {string} width (Optional) The width of the iframe.
-@param {string} height (Optional) The height of the iframe.
-@param {string} title (Optional) The title attribute for the iframe.
-@param {bool} nested (Optional) Whether this is a nested iframe.
+自动拼接 baseURL，无重复斜杠，科学适配多环境
 */ -}}
-
 {{- $url := or (.Get "url") (.Get "src") -}}
 {{- $width := .Get "width" | default "100%" -}}
 {{- $height := .Get "height" | default "32rem" -}}
@@ -16,17 +9,16 @@ Shortcode to include an iframe with fullscreen capability.
 {{- $ordinal := .Ordinal -}}
 {{- $isNested := .Get "nested" | default false -}}
 
-{{- /* 如果 url 是站内资源（以 / 开头），用 relURL 拼接 */ -}}
+{{- /* 关键：读取全局 baseURL，并用 urls.JoinPath 处理斜杠 */ -}}
+{{- $siteBaseURL := .Site.BaseURL -}}
+
 {{- if $url -}}
   {{- if or (hasPrefix $url "http://") (hasPrefix $url "https://") (hasPrefix $url "//") -}}
     {{- /* 外部链接，直接使用 */ -}}
     {{- $url = $url | safeURL -}}
   {{- else -}}
-    {{- /* 站内资源，转成绝对路径再用 relURL */ -}}
-    {{- if not (hasPrefix $url "/") -}}
-      {{- $url = printf "/%s" $url -}}
-    {{- end -}}
-    {{- $url = $url | relURL | safeURL -}}
+    {{- /* 站内资源：用 urls.JoinPath 自动拼接，避免双斜杠 */ -}}
+    {{- $url = urls.JoinPath $siteBaseURL $url | string | safeURL -}}
   {{- end -}}
 {{- else -}}
   {{- errorf "iframe shortcode requires 'url' or 'src' parameter: %s" .Position -}}
@@ -38,7 +30,7 @@ Shortcode to include an iframe with fullscreen capability.
           title="全屏显示">
     ⛶ 全屏
   </button>
-  <iframe src="{{ $url | relURL }}"
+  <iframe src="{{ $url }}"
           width="{{ $width }}"
           height="{{ $height }}"
           frameborder="0"
