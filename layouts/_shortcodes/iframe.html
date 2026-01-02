@@ -1,15 +1,12 @@
 {{- /*
-Shortcode to include an iframe with fullscreen capability and nested iframe protection.
+Shortcode to include an iframe with fullscreen capability.
+自动适配 baseURL，避免路径错误。
 
 @param {string} url The URL to embed in the iframe. (Alias: src)
 @param {string} width (Optional) The width of the iframe.
 @param {string} height (Optional) The height of the iframe.
 @param {string} title (Optional) The title attribute for the iframe.
 @param {bool} nested (Optional) Whether this is a nested iframe.
-
-@example {{< iframe url="https://example.com">}}
-@example {{< iframe src="/dashboard/dashboard.html" >}}
-@example {{< iframe url="dashboard/dashboard.html" height="800px" >}}
 */ -}}
 
 {{- $url := or (.Get "url") (.Get "src") -}}
@@ -17,119 +14,69 @@ Shortcode to include an iframe with fullscreen capability and nested iframe prot
 {{- $height := .Get "height" | default "32rem" -}}
 {{- $title := .Get "title" | default "Embedded Content" -}}
 {{- $ordinal := .Ordinal -}}
-{{- $inDashboardSingle := and (in .Page.File.Dir "dashboard/") (eq .Page.Kind "page") -}}
 {{- $isNested := .Get "nested" | default false -}}
 
-{{- if $inDashboardSingle -}}
-  {{- $height = .Get "height" | default "700px" -}}
-{{- end -}}
-
-{{- /* 改进路径拼接逻辑 */ -}}
+{{- /* 如果 url 是站内资源（以 / 开头），用 relURL 拼接 */ -}}
 {{- if $url -}}
   {{- if or (hasPrefix $url "http://") (hasPrefix $url "https://") (hasPrefix $url "//") -}}
     {{- /* 外部链接，直接使用 */ -}}
     {{- $url = $url | safeURL -}}
   {{- else -}}
-    {{- /* 统一转成站点根目录的绝对路径 */ -}}
+    {{- /* 站内资源，转成绝对路径再用 relURL */ -}}
     {{- if not (hasPrefix $url "/") -}}
       {{- $url = printf "/%s" $url -}}
     {{- end -}}
-    {{- $url = printf "%s%s" .Site.BaseURL (strings.TrimPrefix "/" $url) | safeURL -}}
+    {{- $url = $url | relURL | safeURL -}}
   {{- end -}}
 {{- else -}}
   {{- errorf "iframe shortcode requires 'url' or 'src' parameter: %s" .Position -}}
 {{- end -}}
 
 <div class="hextra-iframe" id="hextra-iframe-{{ $ordinal }}" data-nested="{{ $isNested }}">
-  <button class="hextra-iframe-fullscreen-btn hextra-btn" 
-          data-ordinal="{{ $ordinal }}"
+  <button class="hextra-iframe-fullscreen-btn hextra-btn"
+          onclick="toggleIframeFullscreen('{{ $ordinal }}')"
           title="全屏显示">
     ⛶ 全屏
   </button>
-  <iframe src="{{ $url }}" 
-          width="{{ $width }}" 
-          height="{{ $height }}" 
-          frameborder="0" 
+  <iframe src="{{ $url }}"
+          width="{{ $width }}"
+          height="{{ $height }}"
+          frameborder="0"
           allowfullscreen
-          title="{{ $title }}" 
+          title="{{ $title }}"
           sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
 </div>
 
+<style>
+.hextra-iframe {
+  position: relative;
+}
+.hextra-iframe-fullscreen-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 10;
+}
+.hextra-iframe.fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+  background: #fff;
+}
+</style>
+
 <script>
-// 安全的事件处理，避免重复绑定
-(function() {
-  if (window.dashboardIframeInitialized) return;
-  window.dashboardIframeInitialized = true;
-
-  function toggleIframeFullscreen(ordinal) {
-    const iframeContainer = document.getElementById('hextra-iframe-' + ordinal);
-    if (!iframeContainer) return;
-
-    // 检查是否在嵌套iframe中
-    const isNested = window.self !== window.top;
-    if (isNested && !iframeContainer.dataset.nested) {
-      console.warn('Nested iframe detected, skipping fullscreen');
-      return;
-    }
-
-    if (iframeContainer.classList.contains('fullscreen')) {
-      // 退出全屏
-      iframeContainer.classList.remove('fullscreen');
-      document.body.style.overflow = '';
-      
-      // 通知父页面退出全屏
-      if (window.parent !== window) {
-        window.parent.postMessage('exitFullscreen', '*');
-      }
-    } else {
-      // 进入全屏
-      iframeContainer.classList.add('fullscreen');
-      document.body.style.overflow = 'hidden';
-      
-      // 通知父页面进入全屏
-      if (window.parent !== window) {
-        window.parent.postMessage('enterFullscreen', '*');
-      }
-    }
+function toggleIframeFullscreen(ordinal) {
+  const container = document.getElementById('hextra-iframe-' + ordinal);
+  if (container.classList.contains('fullscreen')) {
+    container.classList.remove('fullscreen');
+    document.body.style.overflow = '';
+  } else {
+    container.classList.add('fullscreen');
+    document.body.style.overflow = 'hidden';
   }
-
-  // ESC 键处理
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-      const fullscreenIframe = document.querySelector('.hextra-iframe.fullscreen');
-      if (fullscreenIframe) {
-        const ordinal = fullscreenIframe.id.replace('hextra-iframe-', '');
-        toggleIframeFullscreen(ordinal);
-      }
-    }
-  });
-
-  // 处理父页面消息
-  window.addEventListener('message', function(event) {
-    if (event.data === 'enterFullscreen') {
-      document.body.style.overflow = 'hidden';
-    } else if (event.data === 'exitFullscreen') {
-      document.body.style.overflow = '';
-    }
-  });
-
-  // 检查是否在iframe中
-  function inIframe() {
-    try {
-      return window.self !== window.top;
-    } catch (e) {
-      return true;
-    }
-  }
-
-  // 如果在iframe中，则禁用某些功能
-  if (inIframe()) {
-    document.querySelectorAll('.hextra-iframe-fullscreen-btn').forEach(btn => {
-      btn.style.display = 'none';
-    });
-  }
-  
-  // 全局暴露函数
-  window.toggleIframeFullscreen = toggleIframeFullscreen;
-})();
+}
 </script>
