@@ -1,5 +1,5 @@
 ---
-title: Hello, Quarto
+title: 'Hello, Quarto'
 date: '2012-04-06'
 categories:
   - Matplotlib

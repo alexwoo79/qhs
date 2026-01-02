@@ -1,0 +1,509 @@
+---
+title: "Tidyverse vs data.table: 功能对比与技巧"
+date: "2025-12-31"
+format: hugo-md
+---
+
+本文档系统对比了 R 语言中两个主流数据处理框架 **tidyverse** (以 `dplyr` 为主) 和 **data.table** 的常用功能与技巧。
+
+```{r}
+#| label: setup
+#| message: false
+#| warning: false
+
+library(tidyverse)
+library(lubridate)
+library(nycflights13)
+library(data.table)
+library(stringr)
+
+# 准备数据
+# Tidyverse 使用 tibble
+flights_tbl <- flights
+
+# data.table 需要转换
+dt <- as.data.table(flights)
+```
+
+## Tip 1: 在计数或分组中创建新列 (Create new columns in a count or groupby)
+
+在汇总数据的同时直接定义新的分组逻辑，无需预先 mutate。
+
+::: {.panel-tabset}
+
+### Tidyverse
+
+在 `count()` 或 `group_by()` 中直接书写逻辑表达式。
+
+```{r}
+#| label: tip1-tidyverse
+
+# 统计飞行时间是否超过 6 小时
+flights_tbl |> 
+  count(long_flight = air_time >= 6 * 60)
+
+# 组合字符串作为分组依据
+flights_tbl |> 
+  count(flight_path = str_c(origin, '->', dest), sort = TRUE) |> 
+  head(5)
+
+# 在 group_by 中创建日期列并汇总
+flights_tbl |> 
+  group_by(date = make_date(year, month, day)) |> 
+  summarise(
+    flights_n = n(), 
+    air_time_median = median(air_time, na.rm = TRUE)
+  ) |> 
+  ungroup() |> 
+  head(5)
+```
+
+### data.table
+
+在 `by` 参数中直接定义表达式。
+
+```{r}
+#| label: tip1-datatable
+
+# 统计飞行时间是否超过 6 小时
+dt[, .N, .(long_flight = (air_time >= 6 * 60))]
+
+# 组合字符串作为分组依据并排序
+dt[, .N, .(flight_path = str_c(origin, '->', dest))][order(-N)] |> head(5)
+
+# 复杂的 group by
+dt[, 
+  .(flights_n = .N, air_time_median = median(air_time, na.rm = TRUE)), 
+  .(date = make_date(year, month, day))
+] |> head(5)
+```
+
+:::
+
+## Tip 2: 随机抽样 (Sample and randomly shuffle data)
+
+::: {.panel-tabset}
+
+### Tidyverse
+
+使用 `slice_sample()` 函数，支持按数量 (`n`) 或比例 (`prop`) 抽样。
+
+```{r}
+#| label: tip2-tidyverse
+
+# 随机抽取 10 行
+flights_tbl |> slice_sample(n = 10)
+
+# 随机抽取 1% 的数据
+flights_tbl |> slice_sample(prop = 0.01) |> nrow()
+
+# 分组抽样：每个出发地随机抽取 3 行
+flights_tbl |> 
+  group_by(origin) |> 
+  slice_sample(n = 3) |> 
+  ungroup()
+```
+
+### data.table
+
+使用 `sample()` 函数结合行索引 `i` 或 `.SD`。
+
+```{r}
+#| label: tip2-datatable
+
+# 随机抽取 10 行
+dt[sample(.N, 10)]
+
+# 随机抽取 1% 的数据
+dt[sample(.N, .N / 100)] |> nrow()
+
+# 分组抽样：使用 .SD 和 chaining
+# 注意：这里仅展示行数统计验证，实际输出为行数据
+dt[, .SD[sample(.N, 3)], by = origin]
+```
+
+:::
+
+## Tip 3: 从年月日构建日期列 (Create a date column)
+
+::: {.panel-tabset}
+
+### Tidyverse
+
+使用 `mutate` 配合 `lubridate::make_date`。
+
+```{r}
+#| label: tip3-tidyverse
+
+flights_tbl |> 
+  select(year, month, day) |> 
+  mutate(date = make_date(year, month, day)) |> 
+  head(5)
+```
+
+### data.table
+
+使用 `:=` 进行引用更新（原地修改），效率更高。
+
+```{r}
+#| label: tip3-datatable
+
+# 注意：data.table 的 := 操作没有返回值（silent），
+# 为了展示结果，通常在末尾加上 [] 或者显式打印
+dt[, date := make_date(year, month, day)][, .(date)] |> head(5)
+```
+
+:::
+
+## Tip 4: 解析数字 (Parse numbers)
+
+使用 `readr::parse_number` (tidyverse 的一部分) 提取字符串中的数值。
+
+```{r}
+#| label: tip4-setup
+# 模拟数据
+numbers_1 <- tibble(number_col = c("#1", "#2", "#3"))
+numbers_2 <- tibble(number_col = c("Number 5", "#6", "7"))
+numbers_3 <- tibble(number_col = c("1.2%", "2.5%", "50.9%"))
+
+dt1 <- as.data.table(numbers_1)
+```
+
+::: {.panel-tabset}
+
+### Tidyverse
+
+```{r}
+#| label: tip4-tidyverse
+
+numbers_1 |> mutate(val = parse_number(number_col))
+numbers_2 |> mutate(val = parse_number(number_col))
+numbers_3 |> mutate(val = parse_number(number_col))
+```
+
+### data.table
+
+data.table 本身没有专门的解析函数，通常混合使用 `parse_number` 或正则。
+
+```{r}
+#| label: tip4-datatable
+
+dt1[, .(val = parse_number(number_col))]
+```
+
+:::
+
+## Tip 5: 按名称模式选择列 (Select columns with starts_with, etc.)
+
+::: {.panel-tabset}
+
+### Tidyverse
+
+`dplyr::select` 提供了丰富的辅助函数：`starts_with`, `ends_with`, `contains`, `everything` 等。
+
+```{r}
+#| label: tip5-tidyverse
+
+# 选择以 dep_ 开头的列
+flights_tbl |> select(starts_with('dep_')) |> head(2)
+
+# 将 dep_ 开头的列移到最前，其他列保留
+flights_tbl |> select(starts_with('dep_'), everything()) |> head(2)
+```
+
+### data.table
+
+使用 `grep` 配合 `with = FALSE` 或者 `..var` 语法。
+
+```{r}
+#| label: tip5-datatable
+
+# 查找以 _time 结尾的列名
+selected_cols <- grep('_time$', colnames(dt), value = TRUE)
+
+# 方式 1: 使用 .. 语法
+dt[, ..selected_cols] |> head(2)
+
+# 方式 2: 使用 with = FALSE
+dt[, selected_cols, with = FALSE] |> head(2)
+
+# 类似 everything() 的效果：重新排列列
+selected_dep <- grep('^dep_', colnames(dt), value = TRUE)
+cols_reordered <- c(selected_dep, setdiff(names(dt), selected_dep))
+dt[, ..cols_reordered] |> head(2)
+```
+
+:::
+
+## Tip 6: 条件赋值 (case_when / fifelse / fcase)
+
+::: {.panel-tabset}
+
+### Tidyverse
+
+使用 `case_when` 进行多条件判断。
+
+```{r}
+#| label: tip6-tidyverse
+
+flights_tbl |> 
+  mutate(
+    origin_name = case_when(
+      origin == 'EWR' ~ 'Newark Intl',
+      origin == 'JFK' ~ 'John F. Kennedy Intl',
+      origin == 'LGA' ~ 'LaGuardia',
+      TRUE ~ origin # 默认情况
+    )
+  ) |> 
+  count(origin_name)
+
+# 另一种方式：recode (主要用于值的重映射)
+flights_tbl |> 
+  mutate(
+    origin_name = recode(origin,
+      EWR = 'Newark Intl',
+      JFK = 'JFK Intl',
+      LGA = 'LaGuardia'
+    )
+  ) |> 
+  count(origin_name)
+```
+
+### data.table
+
+使用 `fifelse` (类似 ifelse 但更快且处理 NA 更严格) 或 `fcase` (类似 case_when)。
+
+```{r}
+#| label: tip6-datatable
+
+# 使用嵌套 fifelse
+dt[, origin_name := fifelse(origin == 'EWR', 'Newark Intl',
+      fifelse(origin == 'JFK', 'John F. Kennedy Intl',
+        fifelse(origin == 'LGA', 'LaGuardia', origin)
+      )
+    )]
+dt[, .N, by = origin_name]
+
+# 使用 fcase (推荐，更清晰)
+dt[, origin_name_fcase := fcase(
+      origin == 'EWR', 'Newark Intl',
+      origin == 'JFK', 'John F. Kennedy Intl',
+      origin == 'LGA', 'LaGuardia',
+      default = origin
+   )]
+dt[, .N, by = origin_name_fcase]
+```
+
+:::
+
+## Tip 7: 批量替换字符串 (str_replace_all)
+
+当需要一次性替换多个模式时。
+
+::: {.panel-tabset}
+
+### Tidyverse
+
+`str_replace_all` 支持命名向量作为映射表。
+
+```{r}
+#| label: tip7-tidyverse
+
+flights_tbl |> 
+  mutate(
+    origin_desc = str_replace_all(
+      origin,
+      c(
+        '^EWR$' = 'Newark International Airport',
+        '^JFK$' = 'John F. Kennedy International Airport',
+        '^LGA$' = 'LaGuardia Airport'
+      )
+    )
+  ) |> 
+  count(origin_desc)
+```
+
+### data.table
+
+同样可以结合 `stringr::str_replace_all` 使用，或者使用 data.table 的更新语法。
+
+```{r}
+#| label: tip7-datatable
+
+# 直接在 j 中调用函数
+dt[, origin_desc := str_replace_all(origin, c(
+    '^EWR$' = 'Newark International Airport',
+    '^JFK$' = 'John F. Kennedy International Airport',
+    '^LGA$' = 'LaGuardia Airport'
+  ))
+]
+dt[, .N, by = origin_desc]
+```
+
+:::
+
+## Tip 8: Transmute (创建新列并只保留新列)
+
+::: {.panel-tabset}
+
+### Tidyverse
+
+`transmute` = `mutate` + `select`。
+
+```{r}
+#| label: tip8-tidyverse
+
+flights_tbl |> 
+  transmute(date = make_date(year, month, day), tailnum) |> 
+  head(3)
+```
+
+### data.table
+
+在 `j` 参数中只返回需要的列。
+
+```{r}
+#| label: tip8-datatable
+
+# 方式 1: 创建并选择
+dt[, .(date = make_date(year, month, day), tailnum)] |> head(3)
+
+# 引用列的几种方式对比
+# dt[, 'tailnum', with = FALSE] # 返回 data.table
+# dt[, .(tailnum)]            # 返回 data.table
+# dt[, tailnum]               # 返回 vector
+```
+
+:::
+
+## Tip 9: 管道中的复杂 Mutate (String processing)
+
+处理复杂的字符串清洗逻辑。
+
+```{r}
+#| label: tip9-setup
+# 准备 airlines 数据
+dt2 <- as.data.table(airlines)
+```
+
+::: {.panel-tabset}
+
+### Tidyverse
+
+利用管道 `|>` 将多个字符串处理步骤串联。
+
+```{r}
+#| label: tip9-tidyverse
+
+airlines |> 
+  mutate(
+    name_clean = name |> 
+      str_to_upper() |> 
+      str_replace_all(' (INC|CO)\\.?$', "") |> 
+      str_replace_all(' AIR ?(LINES|WAYS)?( CORPORATION)?$', "") |> 
+      str_to_title() |> 
+      str_replace_all('\\bUs\\b', 'US')
+  ) |> 
+  select(name, name_clean)
+```
+
+### data.table
+
+可以定义函数或在 `:=` 中嵌套调用。
+
+```{r}
+#| label: tip9-datatable
+
+process_name <- function(x) {
+  x |> 
+    str_to_upper() |> 
+    str_replace_all(' (INC|CO)\\.?$', "") |> 
+    str_replace_all(' AIR ?(LINES|WAYS)?( CORPORATION)?$', "") |> 
+    str_to_title() |> 
+    str_replace_all('\\bUs\\b', 'US')
+}
+
+dt2[, name_clean := process_name(name)]
+dt2[, .(name, name_clean)]
+```
+
+:::
+
+## Tip 10: 过滤分组而不创建新列 (Filter groups)
+
+筛选出符合特定条件（如组内计数大于某值）的分组。
+
+::: {.panel-tabset}
+
+### Tidyverse
+
+`group_by()` -> `filter()` -> `ungroup()`。
+
+```{r}
+#| label: tip10-tidyverse
+
+# 筛选出航班数 >= 10000 的航空公司
+flights_tbl |> 
+  group_by(carrier) |> 
+  filter(n() >= 10000) |> 
+  ungroup() |> 
+  count(carrier, sort = TRUE)
+```
+
+### data.table
+
+使用 `.SD` 结合 `if` 或在 `by` 之后进行过滤。
+
+```{r}
+#| label: tip10-datatable
+
+# 方式 1: 在 j 中使用 if
+# 如果组内行数 .N >= 10000，则返回该组所有数据 (.SD)
+dt[, if (.N >= 10000) .SD, by = carrier][, .N, by = carrier]
+
+# 方式 2: 先聚合再筛选 (如果只需要聚合结果)
+dt[, .(count = .N), by = carrier][count >= 10000][order(-count)]
+```
+
+:::
+
+## Tip 11: 拆分字符串到多列 (Split string into columns)
+
+::: {.panel-tabset}
+
+### Tidyverse
+
+使用 `extract` (正则表达式) 或 `separate` (分隔符)。
+
+```{r}
+#| label: tip11-tidyverse
+
+airlines |> 
+  tidyr::extract(
+    name,
+    into = c('short_name', 'reminder'),
+    regex = '^([^\\s]+) (.*)$',
+    remove = FALSE
+  ) |> 
+  head(3)
+```
+
+### data.table
+
+使用 `tstrsplit`。
+
+```{r}
+#| label: tip11-datatable
+
+dt2 <- as.data.table(airlines)
+
+# 使用 tstrsplit 按空格拆分，keep=1 取第一部分
+dt2[, short_name := tstrsplit(name, ' ', keep = 1)]
+dt2[, .(name, short_name)] |> head(3)
+
+# 多个拆分示例
+strings <- c("apple,banana,orange", "dog cat")
+tstrsplit(strings, ",| ")
+```
+
+:::
