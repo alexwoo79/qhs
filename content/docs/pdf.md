@@ -9,7 +9,7 @@ categories:
 
 ### pdf-short code
 
-`< pdf "/coding/demo.pdf" >` ,注意需要被`{{}}`包裹起来
+`< pdf "../../coding/demo.pdf" >` ,注意需要被`{{}}`包裹起来
 
 
 
@@ -19,7 +19,7 @@ categories:
 `/assets/css/pdf.css`
 `layout/_shortcodes/pdf.html`
 
-{{< pdf "/coding/demo.pdf" >}}
+{{< pdf "../../coding/demo.pdf" >}}
 
 
 

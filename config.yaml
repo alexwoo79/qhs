@@ -1,9 +1,10 @@
 baseURL: https://alexwoo97.github.io/qhs/
+relativeURLs: false # 生产环境下需要设置为false，否则iframe会加载失败
 languageCode: en-us
 title: Alex' Data Analytics Blog
-module:
-  imports:
-  - path: github.com/imfing/hextra
+# module:
+#   imports:
+#   - path: github.com/imfing/hextra
 theme: hextra
 ignoreFiles:
 - ".Rmd$"

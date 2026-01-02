@@ -56,8 +56,9 @@ jobs:
           HUGO_ENV: production
         run: |
           hugo \
+            --config config.yaml\
             --gc --minify \
-            --baseURL "https://alexwoo97.github.io/qhs/"
+            
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
