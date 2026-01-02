@@ -8,12 +8,15 @@ Shortcode to include a PDF file in a page.
 
 {{- $path := .Get 0 -}}
 {{- $url := partial "utils/file-path" (dict "page" .Page "path" $path) -}}
+{{- $inDashboardList := and (in .Page.File.Dir "dashboard/") (eq .Page.Kind "section") -}}
 
 
 <div class="hextra-pdf" id="hextra-pdf-{{ .Ordinal }}">
+  {{ if not $inDashboardList }}
   <button class="hextra-pdf-fullscreen-btn" onclick="togglePdfFullscreen('{{ .Ordinal }}')" title="全屏显示">
     ⛶ 全屏
   </button>
+  {{ end }}
   <iframe src="{{ $url | safeURL }}" width="100%" style="min-height: 32rem;" frameborder="0" allowfullscreen></iframe>
 </div>
 

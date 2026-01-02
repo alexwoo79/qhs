@@ -1,7 +1,7 @@
 ---
 title: Hello, dashboard
 date: '2025-12-31'
-categories:
+tags:
   - dashboard
   - iframe
 ---

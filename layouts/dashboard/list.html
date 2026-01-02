@@ -1,0 +1,38 @@
+{{ define "main" }}
+  <div class='hx:mx-auto hx:flex hextra-max-page-width'>
+    <article class="hx:w-full hx:break-words hx:flex hx:min-h-[calc(100vh-var(--navbar-height))] hx:min-w-0 hx:justify-center hx:pb-8 hx:pr-[calc(env(safe-area-inset-right)-1.5rem)]">
+      <main class="hx:w-full hx:min-w-0 hx:max-w-full hx:px-6 hx:pt-4 hx:md:px-12">
+        {{ if .Title }}<h1 class="dashboard-title">{{ .Title }}</h1>{{ end }}
+        {{ .Content }}
+        
+        <div class="dashboard-list">
+          {{ range .Data.Pages.ByWeight }}
+            {{ if ne .Type "taxonomy" }}
+            <div class="dashboard-list-item">
+              <h2><a href="{{ .RelPermalink }}" class="dashboard-list-link">{{ .Title }}</a></h2>
+              <div class="dashboard-list-meta">
+                <time datetime="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}">
+                  {{ .Date.Format "2006-01-02" }}
+                </time>
+                {{ with .Params.author }}
+                  <span class="dashboard-list-author">by {{ . }}</span>
+                {{ end }}
+              </div>
+              <div class="dashboard-list-summary">
+                {{ with .Params.summary }}{{ . }}{{ else }}{{ .Summary | truncate 200 }}{{ end }}
+              </div>
+              {{ if .Params.tags }}
+                <div class="dashboard-list-tags">
+                  {{ range .Params.tags }}
+                    <span class="dashboard-list-tag">{{ . }}</span>
+                  {{ end }}
+                </div>
+              {{ end }}
+            </div>
+            {{ end }}
+          {{ end }}
+        </div>
+      </main>
+    </article>
+  </div>
+{{ end }}
