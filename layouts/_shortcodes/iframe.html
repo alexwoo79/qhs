@@ -5,10 +5,11 @@ Shortcode to include an iframe with fullscreen capability and nested iframe prot
 @param {string} width (Optional) The width of the iframe.
 @param {string} height (Optional) The height of the iframe.
 @param {string} title (Optional) The title attribute for the iframe.
+@param {bool} nested (Optional) Whether this is a nested iframe.
 
 @example {{< iframe url="https://example.com">}}
-@example {{< iframe src="https://example.com">}}
-@example {{< iframe url="https://example.com" width="100%" height="400px" title="Example Website">}}
+@example {{< iframe src="/dashboard/dashboard.html" >}}
+@example {{< iframe url="dashboard/dashboard.html" height="800px" >}}
 */ -}}
 
 {{- $url := or (.Get "url") (.Get "src") -}}
@@ -23,14 +24,35 @@ Shortcode to include an iframe with fullscreen capability and nested iframe prot
   {{- $height = .Get "height" | default "700px" -}}
 {{- end -}}
 
+{{- /* 改进路径拼接逻辑 */ -}}
+{{- if $url -}}
+  {{- if or (hasPrefix $url "http://") (hasPrefix $url "https://") (hasPrefix $url "//") -}}
+    {{- /* 外部链接，直接使用 */ -}}
+    {{- $url = $url | safeURL -}}
+  {{- else -}}
+    {{- /* 统一转成站点根目录的绝对路径 */ -}}
+    {{- if not (hasPrefix $url "/") -}}
+      {{- $url = printf "/%s" $url -}}
+    {{- end -}}
+    {{- $url = printf "%s%s" .Site.BaseURL (strings.TrimPrefix "/" $url) | safeURL -}}
+  {{- end -}}
+{{- else -}}
+  {{- errorf "iframe shortcode requires 'url' or 'src' parameter: %s" .Position -}}
+{{- end -}}
+
 <div class="hextra-iframe" id="hextra-iframe-{{ $ordinal }}" data-nested="{{ $isNested }}">
   <button class="hextra-iframe-fullscreen-btn hextra-btn" 
-          onclick="toggleIframeFullscreen('{{ $ordinal }}')" 
+          data-ordinal="{{ $ordinal }}"
           title="全屏显示">
     ⛶ 全屏
   </button>
-  <iframe src="{{ $url | relURL | safeURL }}" width="{{ $width }}" height="{{ $height }}" frameborder="0" allowfullscreen
-    title="{{ $title }}" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
+  <iframe src="{{ $url }}" 
+          width="{{ $width }}" 
+          height="{{ $height }}" 
+          frameborder="0" 
+          allowfullscreen
+          title="{{ $title }}" 
+          sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
 </div>
 
 <script>
