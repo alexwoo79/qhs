@@ -6,6 +6,7 @@ title: Alex' Data Analytics Blog
 #   imports:
 #   - path: github.com/imfing/hextra
 theme: hextra
+enableEmoji: true
 ignoreFiles:
 - ".Rmd$"
 - ".ipynb$"
@@ -13,6 +14,7 @@ ignoreFiles:
 - ".qmd$"
 markup:
   highlight:
+    lineNos: true
     noClasses: false
   goldmark:
     renderer:
@@ -25,7 +27,6 @@ markup:
         enable: true
 
 enableInlineShortcodes: true
-
 
 menu:
   main:

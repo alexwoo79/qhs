@@ -192,3 +192,32 @@ Bob-->>John: Jolly good!
 
 - [Markdown 语法](https://www.markdownguide.org/basic-syntax/)
 - [Hugo Markdown](https://gohugo.io/content-management/formats/#markdown)
+
+
+## emoji
+
+:heart:
+
+H1 `===`
+===
+
+H2 `---`
+---
+
+## line
+`***` or `___`
+***
+___
+
+## checkbox 
+
+- [ ] 未完成任务
+- [x] 已完成任务
+
+## Blockquote
+
+```markdown
+> 这是一个引用块。
+```
+
+> 这是一个引用块。
