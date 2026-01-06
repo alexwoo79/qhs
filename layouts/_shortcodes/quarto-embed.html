@@ -1,0 +1,39 @@
+{{/*
+Quarto Embed Shortcode
+
+Usage:
+{{< quarto-embed src="/reports/demo.html" height="600" title="Demo Table" >}}
+
+Parameters:
+- src      (required): iframe src
+- height   (optional): iframe height, default 600
+- title    (optional): caption / accessibility title
+- scrolling(optional): yes | no | auto (default: auto)
+*/}}
+
+{{ $src := .Get "src" }}
+{{ if not $src }}
+  {{ errorf "quarto-embed requires src parameter" }}
+{{ end }}
+
+{{ $height := .Get "height" | default "600" }}
+{{ $title := .Get "title" | default "" }}
+{{ $scrolling := .Get "scrolling" | default "auto" }}
+
+<div class="quarto-embed-container">
+  {{ if $title }}
+    <div class="quarto-embed-title">
+      {{ $title }}
+    </div>
+  {{ end }}
+
+  <iframe
+    src="{{ $src }}"
+    loading="lazy"
+    scrolling="{{ $scrolling }}"
+    style="height: {{ $height }}px;"
+    title="{{ $title | default "Embedded Quarto Content" }}"
+    frameborder="0"
+    allowfullscreen
+  ></iframe>
+</div>

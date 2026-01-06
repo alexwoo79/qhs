@@ -333,3 +333,26 @@
 
 
 
+/* =========================
+   Quarto Embed
+   ========================= */
+
+.quarto-embed-container {
+  width: 100%;
+  margin: 1.5rem 0;
+}
+
+/* 标题 / 说明 */
+.quarto-embed-title {
+  font-size: 0.95rem;
+  color: #555;
+  margin-bottom: 0.5rem;
+}
+
+/* iframe 本体 */
+.quarto-embed-container iframe {
+  width: 100%;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #fff;
+}
