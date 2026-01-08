@@ -328,10 +328,34 @@
       white-space: nowrap;
       max-width: calc(100% - 1rem);
   }
+  
+  /* Mobile text alignment */
+  .custom-table-container.custom-table-center table th,
+  .custom-table-container.custom-table-center table td,
+  .custom-table-container.custom-table-right table th,
+  .custom-table-container.custom-table-right table td,
+  .custom-table-container.custom-table-left table th,
+  .custom-table-container.custom-table-left table td {
+      text-align: inherit !important;
+  }
 }
 
+/* Table alignment styles */
+.custom-table-container.custom-table-center table th,
+.custom-table-container.custom-table-center table td {
+  text-align: center !important;
+}
 
+.custom-table-container.custom-table-right table th,
+.custom-table-container.custom-table-right table td {
+  text-align: right !important;
+}
 
+/* Left alignment remains default */
+.custom-table-container.custom-table-left table th,
+.custom-table-container.custom-table-left table td {
+  text-align: left !important;
+}
 
 /* =========================
    Quarto Embed
@@ -355,4 +379,37 @@
   border: 1px solid #e5e7eb;
   border-radius: 6px;
   background: #fff;
+}
+
+/* =========================
+   Unified Embed System
+   ========================= */
+
+.embed {
+  margin: 2rem 0;
+}
+
+.embed-title {
+  font-size: 0.95rem;
+  color: #555;
+  margin-bottom: 0.5rem;
+}
+
+.embed-frame {
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+}
+
+/* BIM 特化 */
+.embed-bim .embed-frame {
+  background: #c4c2c2;
+}
+
+
+.embed-frame iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
 }

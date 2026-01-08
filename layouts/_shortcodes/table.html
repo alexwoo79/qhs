@@ -7,7 +7,7 @@
 */}}
 
 
-<div class="custom-table-container">
+<div class="custom-table-container {{ if .Get 0 }}custom-table-{{ .Get 0 }}{{ end }}">
 {{ $tableContent := .Inner | replaceRE "^\\s*\\n" "" | replaceRE "\\n\\s*$" "" }}
 {{ $tableContent | markdownify }}
 </div>

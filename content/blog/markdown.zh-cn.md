@@ -224,19 +224,19 @@ ___
 
 ## 自定义表格
 
-{{% table "center" %}}
+{{< table "right" >}}
 | 语法 | 描述 | 示例 |
 |---|---|---|
 | 标题 | 页面标题 | # 这是标题 |
 | 段落 | 正文内容 | 这是一个段落。 |
 | 列表 | 项目列表 | 项目2 |
-{{% /table %}}
+{{< /table >}}
 
 ## CSV数据表格
 
 ### 使用方法
 
 要使用CSV表格短代码，只需在内容中插入以下格式：
-{{< csv-table "sample_data.csv"  >}}
+{{< csv-table "sample_data.csv" "center" >}}
 
-{{< csv-table "实收表.csv" >}}
+{{< csv-table "实收表.csv" "center" >}}
