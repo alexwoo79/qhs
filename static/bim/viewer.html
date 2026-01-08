@@ -96,14 +96,18 @@
     const currentPath = url.pathname;
     console.log('Debug: currentPath =', currentPath);
     
-    // 提取 viewer.html 所在的目录路径作为基础路径
-    // 例如：如果当前路径是 /qhs/bim/viewer.html，则基础路径是 /qhs/bim/
+    // 提取 baseURL 部分作为基础路径
+    // 例如：如果当前路径是 /qhs/bim/viewer.html，则基础路径是 /qhs/
     const viewerIndex = currentPath.indexOf("/bim/viewer.html");
     let basePath = "/";
     
     if (viewerIndex !== -1) {
-        // 提取到 viewer.html 所在目录的路径
-        basePath = currentPath.substring(0, viewerIndex + "/bim/".length);
+        // 提取 /bim/viewer.html 前面的部分作为基础路径
+        basePath = currentPath.substring(0, viewerIndex); // 不包含 /bim/viewer.html
+        // 确保路径以 / 结尾
+        if (!basePath.endsWith("/")) {
+            basePath += "/";
+        }
     } else {
         // 如果找不到 /bim/viewer.html，则使用当前目录
         basePath = currentPath.substring(0, currentPath.lastIndexOf("/") + 1);
