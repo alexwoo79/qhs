@@ -5,6 +5,21 @@
 {{ $ordinal := .Ordinal }}
 {{ $isNested := .Get "nested" | default false }}
 
+{{- /* 关键：读取全局 baseURL，并用 urls.JoinPath 处理斜杠 */ -}}
+{{- $siteBaseURL := .Site.BaseURL -}}
+
+{{- if $src -}}
+  {{- if or (hasPrefix $src "http://") (hasPrefix $src "https://") (hasPrefix $src "//") -}}
+    {{- /* 外部链接，直接使用 */ -}}
+    {{- $src = $src | safeURL -}}
+  {{- else -}}
+    {{- /* 站内资源：用 urls.JoinPath 自动拼接，避免双斜杠 */ -}}
+    {{- $src = urls.JoinPath $siteBaseURL $src | string | safeURL -}}
+  {{- end -}}
+{{- else -}}
+  {{- errorf "embed shortcode requires 'src' parameter: %s" .Position -}}
+{{- end -}}
+
 <div class="embed embed-{{ $type }} hextra-iframe" id="hextra-iframe-{{ $ordinal }}" data-nested="{{ $isNested }}">
   {{ if $title }}
     <div class="embed-title">{{ $title }}</div>
