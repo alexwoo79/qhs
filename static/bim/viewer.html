@@ -103,6 +103,7 @@
     
     if (viewerIndex !== -1) {
         // 提取 /bim/viewer.html 前面的部分作为基础路径
+        // 例如：/qhs/bim/viewer.html -> /qhs/
         basePath = currentPath.substring(0, viewerIndex); // 不包含 /bim/viewer.html
         // 确保路径以 / 结尾
         if (!basePath.endsWith("/")) {
@@ -129,7 +130,7 @@
         }
         
         // 使用 basePath 拼接模型路径
-        // basePath 已经包含了 /qhs/bim/ 这样的完整前缀
+        // basePath 已经包含了项目根路径，例如 /qhs/
         MODEL_SRC = url.origin + basePath + modelPath;
         console.log('Debug: Updated MODEL_SRC =', MODEL_SRC);
     }
