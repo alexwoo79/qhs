@@ -1,15 +1,17 @@
 <!doctype html>
 <html>
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>xeokit BIM Viewer</title>
 
     <!-- 原官方样式 -->
-    <link href="./css/pageStyle.css" rel="stylesheet"/>
+    <link href="./css/pageStyle.css" rel="stylesheet" />
 
     <style>
-        html, body {
+        html,
+        body {
             margin: 0;
             width: 100%;
             height: 100%;
@@ -40,8 +42,33 @@
             background-color: rgba(255, 255, 255, 0.2);
             top: 80px;
             left: 0;
-            width: 350px;
+            width: 0;
+            /* 默认收起 */
             z-index: 200000;
+            transition: width 0.3s ease;
+            /* 添加过渡效果 */
+        }
+
+        #treeViewToggle {
+            position: absolute;
+            top: 80px;
+            left: 0;
+            width: 30px;
+            height: 60px;
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 0 5px 5px 0;
+            cursor: pointer;
+            z-index: 200001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+        }
+
+        #treeViewContainer.expanded {
+            width: 350px;
+            /* 展开后的宽度 */
         }
     </style>
 
@@ -51,160 +78,184 @@
 
 <body>
 
-<canvas id="myCanvas"></canvas>
-<canvas id="myNavCubeCanvas"></canvas>
-<div id="treeViewContainer"></div>
+    <canvas id="myCanvas"></canvas>
+    <canvas id="myNavCubeCanvas"></canvas>
+    <div id="treeViewContainer"></div>
+    <div id="treeViewToggle">
+        <i class="fas fa-bars"></i>
+    </div>
 
-<script type="module">
+    <script type="module">
 
-    import {
-        Viewer,
-        GLTFLoaderPlugin,
-        NavCubePlugin,
-        TreeViewPlugin,
-        FastNavPlugin
-    } from "./dist/xeokit-sdk.es.js";
+        import {
+            Viewer,
+            GLTFLoaderPlugin,
+            NavCubePlugin,
+            TreeViewPlugin,
+            FastNavPlugin
+        } from "./dist/xeokit-sdk.es.js";
 
-    /* =========================
-       1️⃣ 读取 URL 参数
-       ========================= */
+        /* =========================
+           1️⃣ 读取 URL 参数
+           ========================= */
 
-    console.log('Debug: viewer.html loaded');
-    const params = new URLSearchParams(window.location.search);
-    let MODEL_SRC = params.get("model");
-    
-    console.log('Debug: MODEL_SRC =', MODEL_SRC);
+        console.log('Debug: viewer.html loaded');
+        const params = new URLSearchParams(window.location.search);
+        let MODEL_SRC = params.get("model");
 
-    if (!MODEL_SRC) {
-        alert("No model specified. Use ?model=/bim/models/xxx.glb");
-        console.error('Error: Missing model parameter');
-        throw new Error("Missing model parameter");
-    }
+        console.log('Debug: MODEL_SRC =', MODEL_SRC);
 
-    /* =========================
-       2️⃣ 处理模型路径，确保正确拼接 baseURL
-       ========================= */
-
-    // 获取当前页面的完整 URL
-    const currentURL = window.location.href;
-    console.log('Debug: currentURL =', currentURL);
-    
-    // 解析 URL 结构
-    const url = new URL(currentURL);
-    
-    // 获取当前页面的路径
-    const currentPath = url.pathname;
-    console.log('Debug: currentPath =', currentPath);
-    
-    // 提取 baseURL 部分作为基础路径
-    // 例如：如果当前路径是 /qhs/bim/viewer.html，则基础路径是 /qhs/
-    const viewerIndex = currentPath.indexOf("/bim/viewer.html");
-    let basePath = "/";
-    
-    if (viewerIndex !== -1) {
-        // 提取 /bim/viewer.html 前面的部分作为基础路径
-        // 例如：/qhs/bim/viewer.html -> /qhs/
-        basePath = currentPath.substring(0, viewerIndex); // 不包含 /bim/viewer.html
-        // 确保路径以 / 结尾
-        if (!basePath.endsWith("/")) {
-            basePath += "/";
+        if (!MODEL_SRC) {
+            alert("No model specified. Use ?model=/bim/models/xxx.glb");
+            console.error('Error: Missing model parameter');
+            throw new Error("Missing model parameter");
         }
-    } else {
-        // 如果找不到 /bim/viewer.html，则使用当前目录
-        basePath = currentPath.substring(0, currentPath.lastIndexOf("/") + 1);
-    }
-    
-    console.log('Debug: basePath =', basePath);
-    
-    // 处理模型路径
-    if (MODEL_SRC.startsWith("http://") || MODEL_SRC.startsWith("https://")) {
-        // 如果是完整 URL，直接使用
-        console.log('Debug: Using full URL for model');
-    } else {
-        // 如果是相对路径或绝对路径，确保正确拼接 basePath
-        let modelPath = MODEL_SRC;
-        
-        // 移除开头的 / 以便正确拼接
-        if (modelPath.startsWith("/")) {
-            modelPath = modelPath.substring(1);
+
+        /* =========================
+           2️⃣ 处理模型路径，确保正确拼接 baseURL
+           ========================= */
+
+        // 获取当前页面的完整 URL
+        const currentURL = window.location.href;
+        console.log('Debug: currentURL =', currentURL);
+
+        // 解析 URL 结构
+        const url = new URL(currentURL);
+
+        // 获取当前页面的路径
+        const currentPath = url.pathname;
+        console.log('Debug: currentPath =', currentPath);
+
+        // 提取 baseURL 部分作为基础路径
+        // 例如：如果当前路径是 /qhs/bim/viewer.html，则基础路径是 /qhs/
+        const viewerIndex = currentPath.indexOf("/bim/viewer.html");
+        let basePath = "/";
+
+        if (viewerIndex !== -1) {
+            // 提取 /bim/viewer.html 前面的部分作为基础路径
+            // 例如：/qhs/bim/viewer.html -> /qhs/
+            basePath = currentPath.substring(0, viewerIndex); // 不包含 /bim/viewer.html
+            // 确保路径以 / 结尾
+            if (!basePath.endsWith("/")) {
+                basePath += "/";
+            }
+        } else {
+            // 如果找不到 /bim/viewer.html，则使用当前目录
+            basePath = currentPath.substring(0, currentPath.lastIndexOf("/") + 1);
         }
-        
-        // 使用 basePath 拼接模型路径
-        // basePath 已经包含了项目根路径，例如 /qhs/
-        MODEL_SRC = url.origin + basePath + modelPath;
-        console.log('Debug: Updated MODEL_SRC =', MODEL_SRC);
-    }
-    
-    console.log('Debug: Final MODEL_SRC =', MODEL_SRC);
 
-    /* =========================
-       2️⃣ Viewer 初始化（原样保留）
-       ========================= */
+        console.log('Debug: basePath =', basePath);
 
-    const viewer = new Viewer({
-        canvasId: "myCanvas",
-        edges: true,
-        transparent: true,
-        saoEnabled: true,
-        dtxEnabled: true
-    });
+        // 处理模型路径
+        if (MODEL_SRC.startsWith("http://") || MODEL_SRC.startsWith("https://")) {
+            // 如果是完整 URL，直接使用
+            console.log('Debug: Using full URL for model');
+        } else {
+            // 如果是相对路径或绝对路径，确保正确拼接 basePath
+            let modelPath = MODEL_SRC;
 
-    new NavCubePlugin(viewer, {
-        canvasId: "myNavCubeCanvas",
-        size: 250,
-        alignment: "bottomRight",
-        bottomMargin: 100,
-        rightMargin: 10
-    });
+            // 移除开头的 / 以便正确拼接
+            if (modelPath.startsWith("/")) {
+                modelPath = modelPath.substring(1);
+            }
 
-    new FastNavPlugin(viewer, {
-        hideEdges: true,
-        hideSAO: true,
-        hideColorTexture: true,
-        hidePBR: true,
-        delayBeforeRestore: true,
-        delayBeforeRestoreSeconds: 0.4
-    });
+            // 使用 basePath 拼接模型路径
+            // basePath 已经包含了项目根路径，例如 /qhs/
+            MODEL_SRC = url.origin + basePath + modelPath;
+            console.log('Debug: Updated MODEL_SRC =', MODEL_SRC);
+        }
 
-    new TreeViewPlugin(viewer, {
-        containerElement: document.getElementById("treeViewContainer"),
-        hierarchy: "containment",
-        autoExpandDepth: 1
-    });
+        console.log('Debug: Final MODEL_SRC =', MODEL_SRC);
 
-    /* =========================
-       3️⃣ 加载模型（唯一变化点）
-       ========================= */
+        /* =========================
+           2️⃣ Viewer 初始化（原样保留）
+           ========================= */
 
-    console.log('Debug: Initializing GLTFLoaderPlugin');
-    const gltfLoader = new GLTFLoaderPlugin(viewer);
+        const viewer = new Viewer({
+            canvasId: "myCanvas",
+            edges: true,
+            transparent: true,
+            saoEnabled: true,
+            dtxEnabled: true
+        });
 
-    console.log('Debug: Loading model from', MODEL_SRC);
-    const sceneModel = gltfLoader.load({
-        id: "model",
-        src: MODEL_SRC,
-        autoMetaModel: true,
-        edges: true,
-        saoEnabled: true,
-        dtxEnabled: true
-    });
+        new NavCubePlugin(viewer, {
+            canvasId: "myNavCubeCanvas",
+            size: 250,
+            alignment: "bottomRight",
+            bottomMargin: 100,
+            rightMargin: 10
+        });
 
-    sceneModel.on("loaded", () => {
-        console.log('Debug: Model loaded successfully');
-        viewer.cameraFlight.flyTo(sceneModel);
-    });
-    
-    sceneModel.on("loadError", (error) => {
-        console.error('Error: Failed to load model', error);
-        alert('Failed to load model: ' + error);
-    });
-    
-    sceneModel.on("loading", (progress) => {
-        console.log('Debug: Loading progress', progress);
-    });
+        new FastNavPlugin(viewer, {
+            hideEdges: true,
+            hideSAO: true,
+            hideColorTexture: true,
+            hidePBR: true,
+            delayBeforeRestore: true,
+            delayBeforeRestoreSeconds: 0.4
+        });
 
-    window.viewer = viewer;
+        new TreeViewPlugin(viewer, {
+            containerElement: document.getElementById("treeViewContainer"),
+            hierarchy: "containment",
+            autoExpandDepth: 1
+        });
 
-</script>
+        /* =========================
+           3️⃣ 加载模型（唯一变化点）
+           ========================= */
+
+        console.log('Debug: Initializing GLTFLoaderPlugin');
+        const gltfLoader = new GLTFLoaderPlugin(viewer);
+
+        console.log('Debug: Loading model from', MODEL_SRC);
+        const sceneModel = gltfLoader.load({
+            id: "model",
+            src: MODEL_SRC,
+            autoMetaModel: true,
+            edges: true,
+            saoEnabled: true,
+            dtxEnabled: true
+        });
+
+        sceneModel.on("loaded", () => {
+            console.log('Debug: Model loaded successfully');
+            viewer.cameraFlight.flyTo(sceneModel);
+        });
+
+        sceneModel.on("loadError", (error) => {
+            console.error('Error: Failed to load model', error);
+            alert('Failed to load model: ' + error);
+        });
+
+        sceneModel.on("loading", (progress) => {
+            console.log('Debug: Loading progress', progress);
+        });
+
+        window.viewer = viewer;
+
+        /* =========================
+           4️⃣ 树状视图切换功能
+           ========================= */
+
+        const treeViewContainer = document.getElementById('treeViewContainer');
+        const treeViewToggle = document.getElementById('treeViewToggle');
+        const toggleIcon = treeViewToggle.querySelector('i');
+
+        // 添加切换事件监听器
+        treeViewToggle.addEventListener('click', function () {
+            treeViewContainer.classList.toggle('expanded');
+
+            // 切换图标
+            if (treeViewContainer.classList.contains('expanded')) {
+                toggleIcon.className = 'fas fa-times';
+            } else {
+                toggleIcon.className = 'fas fa-bars';
+            }
+        });
+
+    </script>
 </body>
+
 </html>
