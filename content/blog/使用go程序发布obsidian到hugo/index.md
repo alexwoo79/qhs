@@ -1,5 +1,5 @@
 ---
-date: "2026-02-02T23:04:19+08:00"
+date: "2026-04-03T07:17:46+08:00"
 draft: false
 tags:
     - blog
@@ -21,10 +21,7 @@ title: 使用go程序发布obsidian到hugo
 
 ---
 
-  
-
 ## ✨ 核心特性
-
 
 * 🧠 **单一内容源**：所有内容仅在 Obsidian 中维护
 
@@ -37,9 +34,8 @@ title: 使用go程序发布obsidian到hugo
 * 🧪 **`--dry-run` 预演模式**：只提示，不写文件
 
 * ♻️ **安全覆盖机制**：已存在内容提示是否更新
-
+[使用Obsidian发布Hugo](../使用Obsidian发布Hugo_2/使用Obsidian发布Hugo.md)
 ---
-
 ## 📁 一、Obsidian 目录与写作规范（非常重要）
 
 ### 1️⃣ 每一篇 Blog 必须是一个独立文件夹
@@ -63,7 +59,6 @@ ObsidianVault/
 * **文件夹 = 一篇文章（未来的 Hugo Page Bundle）**
 
 * md 文件名可随意，但通常与文件夹名一致
-
 ---
 ### 2️⃣ 附件必须与 md 文件放在同一目录
 
@@ -79,7 +74,6 @@ ObsidianVault/
 * 保证图片链接不失效
 
 ---
-
 ### 3️⃣ Obsidian 附件链接方式（必须修改）
 
 请在 Obsidian 设置中调整：
@@ -103,7 +97,6 @@ Settings → Files & Links → New link format
 ```
 
 ❌ 不要使用 `![[image1.png]]`（Wiki 链接）
-
 ---
 ### 4️⃣ 必须具备 `blog` 标签才会被发布
 
@@ -141,7 +134,6 @@ tags:
 
 
 ---
-
 ## 🏗 二、Hugo 侧要求
 
 * 使用 **Page Bundle** 结构
@@ -168,7 +160,6 @@ content/blog/my-first-blog/
 * 自动补齐 Hugo front matter
 
 ---
-
 ## 🧩 三、Go 程序结构说明
 
 ```text
@@ -183,16 +174,13 @@ content/blog/my-first-blog/
 
 ├── publish.go # 发布决策（存在 / 覆盖 / dry-run）
 
-├── hash.go # 目录级 hash 计算
-
-├── publish_md.go # 实际生成 Hugo Page Bundle
+├── hash.go # 目录级 hash 
 
 ├── config.json # 路径配置
 
 ```
 
 ---
-
 ### 🔁 发布流程（非常关键）
 
 ```text
@@ -231,9 +219,8 @@ Scan Obsidian
 
   
 
+
 ---
-
-
 ## 🧪 四、使用方式
 
 
@@ -253,7 +240,6 @@ go run .
 
 
 ---
-
 ### 2️⃣ dry-run（强烈推荐）
 
 
@@ -281,7 +267,6 @@ go run . --dry-run
 > ⚠️ 不会写入任何文件
 
 ---
-
 ### 3️⃣ 强制更新（CI / 批量发布）
 
 ```bash
@@ -298,7 +283,6 @@ go run . --update
   
 
 ---
-
 ## 🧠 五、自动生成的 Hugo Front Matter
 
 如果 Obsidian md 中没有定义，工具会自动补全：
@@ -327,7 +311,6 @@ tags:
 已有字段 **不会被覆盖**。
 
 ---
-
 ## 🚀 六、适合谁使用？
 
   
@@ -340,9 +323,8 @@ tags:
 
 * 🧩 Quarto / Pandoc / 多格式发布体系的前置工具
 
+
 ---
-
-
 ## 🏁 设计哲学
 
   
@@ -353,8 +335,6 @@ tags:
 
 > **Hugo 只接收“干净内容”**
 
----
-
 
 这个项目已经完全具备：
 
@@ -364,5 +344,4 @@ tags:
 * 团队写作
 
 * CI 自动发布
-
-  
+---

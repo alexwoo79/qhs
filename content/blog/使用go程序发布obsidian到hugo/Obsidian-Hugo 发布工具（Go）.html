@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Obsidian-Hugo 发布工具（Go）</title>
+  <style>
+
+html {
+color: #1a1a1a;
+background-color: #fdfdfd;
+}
+body {
+margin: 0 auto;
+max-width: 36em;
+padding-left: 50px;
+padding-right: 50px;
+padding-top: 50px;
+padding-bottom: 50px;
+hyphens: auto;
+overflow-wrap: break-word;
+text-rendering: optimizeLegibility;
+font-kerning: normal;
+}
+@media (max-width: 600px) {
+body {
+font-size: 0.9em;
+padding: 12px;
+}
+h1 {
+font-size: 1.8em;
+}
+}
+@media print {
+html {
+background-color: white;
+}
+body {
+background-color: transparent;
+color: black;
+font-size: 12pt;
+}
+p, h2, h3 {
+orphans: 3;
+widows: 3;
+}
+h2, h3, h4 {
+page-break-after: avoid;
+}
+}
+p {
+margin: 1em 0;
+}
+a {
+color: #1a1a1a;
+}
+a:visited {
+color: #1a1a1a;
+}
+img {
+max-width: 100%;
+}
+svg {
+height: auto;
+max-width: 100%;
+}
+h1, h2, h3, h4, h5, h6 {
+margin-top: 1.4em;
+}
+h5, h6 {
+font-size: 1em;
+font-style: italic;
+}
+h6 {
+font-weight: normal;
+}
+ol, ul {
+padding-left: 1.7em;
+margin-top: 1em;
+}
+li > ol, li > ul {
+margin-top: 0;
+}
+blockquote {
+margin: 1em 0 1em 1.7em;
+padding-left: 1em;
+border-left: 2px solid #e6e6e6;
+color: #606060;
+}
+code {
+font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+font-size: 85%;
+margin: 0;
+hyphens: manual;
+}
+pre {
+margin: 1em 0;
+overflow: auto;
+}
+pre code {
+padding: 0;
+overflow: visible;
+overflow-wrap: normal;
+}
+.sourceCode {
+background-color: transparent;
+overflow: visible;
+}
+hr {
+border: none;
+border-top: 1px solid #1a1a1a;
+height: 1px;
+margin: 1em 0;
+}
+table {
+margin: 1em 0;
+border-collapse: collapse;
+width: 100%;
+overflow-x: auto;
+display: block;
+font-variant-numeric: lining-nums tabular-nums;
+}
+table caption {
+margin-bottom: 0.75em;
+}
+tbody {
+margin-top: 0.5em;
+border-top: 1px solid #1a1a1a;
+border-bottom: 1px solid #1a1a1a;
+}
+th {
+border-top: 1px solid #1a1a1a;
+padding: 0.25em 0.5em 0.25em 0.5em;
+}
+td {
+padding: 0.125em 0.5em 0.25em 0.5em;
+}
+header {
+margin-bottom: 4em;
+text-align: center;
+}
+#TOC li {
+list-style: none;
+}
+#TOC ul {
+padding-left: 1.3em;
+}
+#TOC > ul {
+padding-left: 0;
+}
+#TOC a:not(:hover) {
+text-decoration: none;
+}
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Obsidian-Hugo 发布工具（Go）</h1>
+</header>
+<p>#blog #go #hugo</p>
+<p>这是一个 <strong>以 Obsidian 为唯一内容源</strong> 的 Hugo
+发布工具，使用 Go 编写。</p>
+<p>它的目标不是“同步文件”，而是：</p>
+<blockquote>
+<p><strong>基于规则判断 → 生成 Hugo Page Bundle → 安全发布</strong></p>
+</blockquote>
+<p>无需依赖 Obsidian
+插件，不污染原始笔记，适合长期写作、博客与技术文档工作流。</p>
+<h2 id="核心特性">✨ 核心特性</h2>
+<ul>
+<li><p>🧠 <strong>单一内容源</strong>：所有内容仅在 Obsidian
+中维护</p></li>
+<li><p>📦 <strong>Hugo Page Bundle
+原生支持</strong>（<code>index.md</code> + 附件）</p></li>
+<li><p>🏷 <strong>基于 tag 的发布规则</strong>（必须包含
+<code>blog</code>）</p></li>
+<li><p>🔍 <strong>hash 级内容判断</strong>：未变化内容自动跳过</p></li>
+<li><p>🧪 <strong><code>--dry-run</code>
+预演模式</strong>：只提示，不写文件</p></li>
+<li><p>♻️ <strong>安全覆盖机制</strong>：已存在内容提示是否更新</p></li>
+</ul>
+<h2 id="一obsidian-目录与写作规范非常重要">📁 一、Obsidian
+目录与写作规范（非常重要）</h2>
+<h3 id="每一篇-blog-必须是一个独立文件夹">1️⃣ 每一篇 Blog
+必须是一个独立文件夹</h3>
+<pre class="text"><code>
+ObsidianVault/
+
+└── My First Blog/
+
+├── My First Blog.md
+
+├── image1.png
+
+├── diagram.svg
+</code></pre>
+<ul>
+<li><p><strong>文件夹 = 一篇文章（未来的 Hugo Page
+Bundle）</strong></p></li>
+<li><p>md 文件名可随意，但通常与文件夹名一致</p></li>
+</ul>
+<h3 id="附件必须与-md-文件放在同一目录">2️⃣ 附件必须与 md
+文件放在同一目录</h3>
+<ul>
+<li><p>图片 / PDF / SVG 等附件</p></li>
+<li><p>不使用 Obsidian 的全局附件目录</p></li>
+</ul>
+<p>这样才能：</p>
+<ul>
+<li><p>直接 copy 到 Hugo Page Bundle</p></li>
+<li><p>保证图片链接不失效</p></li>
+</ul>
+<h3 id="obsidian-附件链接方式必须修改">3️⃣ Obsidian
+附件链接方式（必须修改）</h3>
+<p>请在 Obsidian 设置中调整：</p>
+<pre class="text"><code>
+Settings → Files &amp; Links → New link format
+</code></pre>
+<p>选择：</p>
+<blockquote>
+<p>✅ <strong>Markdown</strong></p>
+</blockquote>
+<p>即生成：</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode md"><code class="sourceCode markdown"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="al">![](image1.png)</span></span></code></pre></div>
+<p>❌ 不要使用 <code>![[image1.png]]</code>（Wiki 链接）</p>
+<h3 id="必须具备-blog-标签才会被发布">4️⃣ 必须具备 <code>blog</code>
+标签才会被发布</h3>
+<p>以下任一方式即可：</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode md"><code class="sourceCode markdown"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>#blog</span></code></pre></div>
+<p>或：</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">tags</span><span class="kw">:</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> blog</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> golang</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> hugo</span></span></code></pre></div>
+<p>发布规则：</p>
+<ul>
+<li><p>❌ 没有 <code>blog</code> → 不会进入 Hugo</p></li>
+<li><p>✅ 有 <code>blog</code> → 发布</p></li>
+<li><p>✅ 其他 tags 会 <strong>完整映射到 Hugo front
+matter</strong></p></li>
+</ul>
+<h2 id="二hugo-侧要求">🏗 二、Hugo 侧要求</h2>
+<ul>
+<li>使用 <strong>Page Bundle</strong> 结构</li>
+</ul>
+<pre class="text"><code>
+content/blog/my-first-blog/
+
+├── index.md
+
+├── image1.png
+
+└── diagram.svg
+</code></pre>
+<ul>
+<li><p>本工具会：</p></li>
+<li><p>自动将 md → <code>index.md</code></p></li>
+<li><p>自动补齐 Hugo front matter</p></li>
+</ul>
+<h2 id="三go-程序结构说明">🧩 三、Go 程序结构说明</h2>
+<pre class="text"><code>
+.
+
+├── main.go # 程序入口，参数解析
+
+├── config.go # config.json 读取
+
+├── scan.go # 扫描 Obsidian 中可发布的 blog
+
+├── publish.go # 发布决策（存在 / 覆盖 / dry-run）
+
+├── hash.go # 目录级 hash 计算
+
+├── publish_md.go # 实际生成 Hugo Page Bundle
+
+├── config.json # 路径配置
+</code></pre>
+<h3 id="发布流程非常关键">🔁 发布流程（非常关键）</h3>
+<pre class="text"><code>
+Scan Obsidian
+
+↓
+
+检查是否包含 blog tag
+
+↓
+
+计算 Obsidian 目录 hash
+
+↓
+
+检查 Hugo 是否已存在 bundle
+
+↓
+
+┌───────────────┐
+
+│ 内容未变化 │ → 跳过
+
+├───────────────┤
+
+│ 内容变化 │ → 提示是否覆盖
+
+├───────────────┤
+
+│ 不存在 │ → 发布
+
+└───────────────┘
+</code></pre>
+<h2 id="四使用方式">🧪 四、使用方式</h2>
+<h3 id="普通发布安全模式">1️⃣ 普通发布（安全模式）</h3>
+<div class="sourceCode" id="cb9"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> run .</span></code></pre></div>
+<ul>
+<li><p>已存在内容会询问是否覆盖</p></li>
+<li><p>未变化内容自动跳过</p></li>
+</ul>
+<h3 id="dry-run强烈推荐">2️⃣ dry-run（强烈推荐）</h3>
+<div class="sourceCode" id="cb10"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> run . <span class="at">--dry-run</span></span></code></pre></div>
+<p>输出示例：</p>
+<pre class="text"><code>
+🆕 will publish: my-first-blog
+
+⏭ unchanged: golang-notes
+
+♻️ will overwrite: hugo-workflow
+</code></pre>
+<blockquote>
+<p>⚠️ 不会写入任何文件</p>
+</blockquote>
+<h3 id="强制更新ci-批量发布">3️⃣ 强制更新（CI / 批量发布）</h3>
+<div class="sourceCode" id="cb12"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> run . <span class="at">--update</span></span></code></pre></div>
+<ul>
+<li><p>不询问</p></li>
+<li><p>直接覆盖</p></li>
+</ul>
+<h2 id="五自动生成的-hugo-front-matter">🧠 五、自动生成的 Hugo Front
+Matter</h2>
+<p>如果 Obsidian md 中没有定义，工具会自动补全：</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="pp">---</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="fu">title</span><span class="kw">:</span><span class="at"> My First Blog</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="fu">date</span><span class="kw">:</span><span class="at"> 2026-02-02T10:30:00+09:00</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="fu">draft</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="fu">tags</span><span class="kw">:</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> blog</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> golang</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a><span class="pp">---</span></span></code></pre></div>
+<p>已有字段 <strong>不会被覆盖</strong>。</p>
+<h2 id="六适合谁使用">🚀 六、适合谁使用？</h2>
+<ul>
+<li><p>✍️ 使用 Obsidian 写博客的人</p></li>
+<li><p>🧠 希望 Hugo 内容完全可控的人</p></li>
+<li><p>📚 技术文档 / 长期写作</p></li>
+<li><p>🧩 Quarto / Pandoc / 多格式发布体系的前置工具</p></li>
+</ul>
+<h2 id="设计哲学">🏁 设计哲学</h2>
+<blockquote>
+<p><strong>Obsidian 负责写作</strong></p>
+</blockquote>
+<blockquote>
+<p><strong>Go 工具负责决策与发布</strong></p>
+</blockquote>
+<blockquote>
+<p><strong>Hugo 只接收“干净内容”</strong></p>
+</blockquote>
+<p>这个项目已经完全具备：</p>
+<ul>
+<li><p>开源发布</p></li>
+<li><p>团队写作</p></li>
+<li><p>CI 自动发布</p></li>
+</ul>
+</body>
+</html>
